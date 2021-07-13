@@ -7,6 +7,6 @@ namespace FilmesAPI.Data
     {
         public FilmeContext(DbContextOptions<FilmeContext> options) : base(options) { }
 
-        DbSet<Filme> Filmes { get; set; }
+        public DbSet<Filme> Filmes { get; set; }
     }
 }
