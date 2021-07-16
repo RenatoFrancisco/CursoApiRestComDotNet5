@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using FilmesAPI.Models;
-using System;
 using System.Linq;
+using FilmesAPI.Data;
 
 namespace FilmesAPI.Controllers
 {
@@ -10,27 +10,30 @@ namespace FilmesAPI.Controllers
     [Route("[controller]")]
     public class FilmesController : ControllerBase
     {
-        private static IList<Filme> _filmes = new List<Filme>();
-        private static int _id;
+        private readonly FilmeContext _context;
+        public FilmesController(FilmeContext context)
+        {
+            _context = context;
+        }
 
         [HttpPost]
         public IActionResult Adicionar(Filme filme)
         {
-            filme.Id = ++_id;
-            _filmes.Add(filme);
+            _context.Filmes.Add(filme);
+            _context.SaveChanges();
             return CreatedAtAction(nameof(RecuperarFilmes), new { Id =  filme.Id }, filme);
         }
 
         [HttpGet]
         public IEnumerable<Filme> RecuperarFilmes()
         {
-            return _filmes;
+            return _context.Filmes;
         }
 
         [HttpGet("{id:int}")]
         public IActionResult RecuperarFilmePorId(int id)
         {
-            var filme = _filmes.FirstOrDefault(f => f.Id == id);
+            var filme = _context.Filmes.FirstOrDefault(f => f.Id == id);
             if (filme is not null)
                 return Ok(filme);
 
