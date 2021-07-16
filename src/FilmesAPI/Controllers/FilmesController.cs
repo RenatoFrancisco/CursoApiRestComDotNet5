@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using FilmesAPI.Models;
 using System.Linq;
 using FilmesAPI.Data;
+using AutoMapper;
+using FilmesAPI.Data.DTOs;
 
 namespace FilmesAPI.Controllers
 {
@@ -11,14 +13,18 @@ namespace FilmesAPI.Controllers
     public class FilmesController : ControllerBase
     {
         private readonly FilmeContext _context;
-        public FilmesController(FilmeContext context)
+        private readonly IMapper _mapper;
+        
+        public FilmesController(FilmeContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpPost]
-        public IActionResult Adicionar(Filme filme)
+        public IActionResult Adicionar(CreateFilmeDTO filmeDTO)
         {
+            var filme = _mapper.Map<Filme>(filmeDTO);
             _context.Filmes.Add(filme);
             _context.SaveChanges();
             return CreatedAtAction(nameof(RecuperarFilmes), new { Id =  filme.Id }, filme);
@@ -35,22 +41,22 @@ namespace FilmesAPI.Controllers
         {
             var filme = ObterPorId(id);
             if (filme is not null)
-                return Ok(filme);
+            {
+                var filmeDTO = _mapper.Map<ReadFilmeDTO>(filme);
+                return Ok(filmeDTO);
+            }
 
             return NotFound();
         }
     
         [HttpPut("{id:int}")]
-        public IActionResult Atualizar(int id, Filme filmeNovo)
+        public IActionResult Atualizar(int id, UpdateFilmeDTO filmeDTO)
         {
             var filme = ObterPorId(id);
             if (filme is null)
                 return NotFound();
 
-            filme.Titulo = filmeNovo.Titulo;
-            filme.Genero = filmeNovo.Genero;
-            filme.Duracao = filmeNovo.Duracao;
-            filme.Diretor = filmeNovo.Diretor;
+            _mapper.Map(filmeDTO, filme);
 
             _context.SaveChanges();
             return NoContent();
