@@ -33,11 +33,41 @@ namespace FilmesAPI.Controllers
         [HttpGet("{id:int}")]
         public IActionResult RecuperarFilmePorId(int id)
         {
-            var filme = _context.Filmes.FirstOrDefault(f => f.Id == id);
+            var filme = ObterPorId(id);
             if (filme is not null)
                 return Ok(filme);
 
             return NotFound();
         }
+    
+        [HttpPut("{id:int}")]
+        public IActionResult Atualizar(int id, Filme filmeNovo)
+        {
+            var filme = ObterPorId(id);
+            if (filme is null)
+                return NotFound();
+
+            filme.Titulo = filmeNovo.Titulo;
+            filme.Genero = filmeNovo.Genero;
+            filme.Duracao = filmeNovo.Duracao;
+            filme.Diretor = filmeNovo.Diretor;
+
+            _context.SaveChanges();
+            return NoContent();
+        }
+
+        [HttpDelete("{id:int")]
+        public IActionResult Deletar(int id)
+        {
+            var filme = ObterPorId(id);
+            if (filme is null)
+                return NotFound();
+
+            _context.Remove(filme);
+            _context.SaveChanges();
+            return NoContent();
+        }
+
+        private Filme ObterPorId(int id) => _context.Filmes.FirstOrDefault(f => f.Id == id);
     }
 }
